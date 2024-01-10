@@ -15,6 +15,12 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // testing 
 app.get('/ready', notes_1.test);
+// create a note
+app.post('/notes/create', notes_1.createNote);
+// get all notes
+app.get('/notes', notes_1.getNotes);
+// get a single note
+app.get('/notes/:id', notes_1.getNote);
 app.listen(process.env.PORT, () => {
     console.log(`🚀🚀🚀 Server is running at https://localhost:${process.env.PORT}`);
 });

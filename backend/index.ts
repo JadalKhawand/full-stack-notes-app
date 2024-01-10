@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { test } from "./controllers/notes";
+import {test, createNote, getNotes, getNote} from './controllers/notes'
 dotenv.config()
 const app: Express = express()
 const prisma = new PrismaClient()
@@ -11,6 +11,19 @@ app.use(express.json())
 
 // testing 
 app.get('/ready', test)
+
+// create a note
+
+app.post('/notes/create', createNote)
+
+// get all notes
+
+app.get('/notes', getNotes)
+
+// get a single note
+
+app.get('/notes/:id',getNote)
+
 
 
 
