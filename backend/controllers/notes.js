@@ -9,20 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNote = exports.getNotes = exports.createNote = exports.test = void 0;
+exports.updateNote = exports.deleteNote = exports.getNote = exports.getNotes = exports.createNote = exports.test = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const test = (req, res) => {
-    res.status(200).send('OK');
+    res.status(200).send("OK");
 };
 exports.test = test;
 const createNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, title, content } = req.body;
+    const { title, content } = req.body;
     const user = yield prisma.note.create({
         data: {
-            name: name,
             title: title,
-            content: content
+            content: content,
         },
     });
     console.log(user);
@@ -36,11 +35,42 @@ const getNotes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getNotes = getNotes;
 const getNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user_id = parseInt(req.params.id);
-    const notes = yield prisma.note.findUnique({ where: {
-            id: user_id
-        } });
+    const notes = yield prisma.note.findUnique({
+        where: {
+            id: user_id,
+        },
+    });
     if (isNaN(user_id))
-        return res.status(400).send('user not found');
+        return res.status(400).send("user not found");
     res.json(notes);
 });
 exports.getNote = getNote;
+// delete a note
+const deleteNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user_id = parseInt(req.params.id);
+    const notes = yield prisma.note.delete({
+        where: {
+            id: user_id,
+        },
+    });
+    if (isNaN(user_id))
+        return res.status(400).send("user not found");
+    res.json(notes);
+});
+exports.deleteNote = deleteNote;
+// update note
+const updateNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user_id = parseInt(req.params.id);
+    const notes = yield prisma.note.update({
+        where: {
+            id: user_id,
+        },
+        data: {
+            content: req.body.content,
+        }
+    });
+    if (isNaN(user_id))
+        return res.status(400).send("user not found");
+    res.json(notes);
+});
+exports.updateNote = updateNote;

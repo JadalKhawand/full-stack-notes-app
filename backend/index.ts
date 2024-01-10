@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from 'cors'
 import dotenv from 'dotenv'
-import {test, createNote, getNotes, getNote} from './controllers/notes'
+import {test, createNote, getNotes, getNote, deleteNote, updateNote} from './controllers/notes'
 dotenv.config()
 const app: Express = express()
 const prisma = new PrismaClient()
@@ -24,6 +24,13 @@ app.get('/notes', getNotes)
 
 app.get('/notes/:id',getNote)
 
+// delete a user
+
+app.delete('/notes/delete/:id',deleteNote)
+
+// update a note
+
+app.put('/notes/update/:id', updateNote)
 
 
 
