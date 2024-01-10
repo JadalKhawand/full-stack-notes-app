@@ -1,16 +1,29 @@
 import React from "react";
 import { useState } from "react";
+import axios from 'axios'
+import {useNavigate} from "react-router-dom"
 function Add() {
-  const [notes, setNotes] = useState({
+  const [note, setNote] = useState({
     title: "",
     content: "",
   });
+  const navigate = useNavigate()
 
   function handleChange(e: any) {
-    setNotes((prevNotes) => ({
+    setNote((prevNotes) => ({
       ...prevNotes,
       [e.target.name]: e.target.value,
     }));
+  }
+  async function handleSubmit(e:any){
+    e.preventDefault()
+    try {
+      await axios.post("http://localhost:5000/notes/create", note)
+      navigate("/")
+    } catch (error) {
+      console.log(error)
+    }
+    console.log("Submitted");
   }
 
   return (
@@ -21,9 +34,11 @@ function Add() {
       <input type="text" onChange={handleChange} name="title" />
 
       <label>Note Content:</label>
-      <input type="number" onChange={handleChange} name="content" />
+      <textarea  onChange={handleChange} name="content" />
+      <button onClick={handleSubmit}>Add Note</button>
     </div>
   );
+
 }
 
 export default Add;
