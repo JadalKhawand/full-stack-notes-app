@@ -1,3 +1,4 @@
+
 .container {
   height: 100vh;
   display: flex;
@@ -17,13 +18,20 @@
 .note{
   display: flex;
   flex-direction: column;
-  height: 300px;
+  flex-wrap: nowrap;
+  height: 400px;
   width: 250px;
-  background-color: rgb(73, 166, 166);
+  background-color: #49a6a6;
   border-radius: 50px;
-  
+  justify-content: space-between;
+  padding: 20px;
 
 }
+.note p{
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+
 .buttons{
   display: flex;
   flex-direction: row;
@@ -62,15 +70,24 @@
   flex-direction: column;
   gap: 30px;
   text-align: center;
+  background-color: #5fc65f;
+
 }
 textarea{
   width: 270px;
   height: 230px;
 }
 .add{
-  height: 80px;
+  height: 60px;
   width: 80px;
   margin-top: 20px;
+  cursor: pointer;
+  background-color: blue;
+  padding: 4px;
+}
+.add:hover{
+  background-color: rgb(73, 166, 166);
+
 }
 .header{
   width: 1000px;
@@ -78,4 +95,21 @@ textarea{
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.updated-note{
+  width: 270px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+}
+.updated-note input{
+  width: 270px;
+  height: 30px;
+}
+.submit-button{
+  padding: 7px;
+  background-color: burlywood ;
+  cursor: pointer;
 }
