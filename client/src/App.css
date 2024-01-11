@@ -1,16 +1,18 @@
 .container {
   height: 100vh;
-  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   flex-direction: column;
-  gap: 50px;
+  gap: 10px;
+  
 }
 .notes{
   display: flex;
   gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .note{
   display: flex;
@@ -19,6 +21,7 @@
   width: 250px;
   background-color: rgb(73, 166, 166);
   border-radius: 50px;
+  
 
 }
 .buttons{
@@ -62,4 +65,16 @@
 textarea{
   width: 270px;
   height: 230px;
+}
+.add{
+  height: 80px;
+  width: 80px;
+  margin-top: 20px;
+}
+.header{
+  width: 1000px;
+  height: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
