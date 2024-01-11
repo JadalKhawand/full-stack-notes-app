@@ -28,7 +28,7 @@ function Home() {
 
   async function handleDelete(id: number) {
     try {
-      await axios.delete("http://localhost:5000/notes/delete/" + id);
+      await axios.delete("http://localhost:5000/notes/delete/"+id);
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -60,9 +60,9 @@ function Home() {
               <div className="buttons">
                 <button
                   className="update"
-                  onClick={() => handleUpdate(note.id)}
-                >
-                  Update
+      
+                ><Link to={`notes/update/${note.id}`}> Update</Link>
+                 
                 </button>
                 <button
                   className="delete"
