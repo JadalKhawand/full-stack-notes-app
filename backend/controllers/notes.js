@@ -8,37 +8,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.getUsers = exports.updateNote = exports.deleteNote = exports.getNote = exports.getNotes = exports.createNote = exports.authToken = exports.login = exports.createUser = exports.test = void 0;
 const client_1 = require("@prisma/client");
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+require('dotenv').config();
+const bcrypt = require('bcryptjs');
 const prisma = new client_1.PrismaClient();
-// Test endpoint
+const jwt = require("jsonwebtoken");
 const test = (req, res) => {
     res.status(200).send("OK");
 };
 exports.test = test;
-// Create a new user
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password, name } = req.body;
         const exists = yield prisma.user.findUnique({
-            where: { email },
+            where: { email: req.body.email },
         });
         if (exists) {
-            throw new Error("Email already in use");
+            throw Error("Email already in use");
         }
-        const salt = yield bcryptjs_1.default.genSalt(10);
-        const hashedPassword = yield bcryptjs_1.default.hash(password, salt);
+        const salt = yield bcrypt.genSalt(10);
+        const hash = yield bcrypt.hash(req.body.password, salt);
         const user = yield prisma.user.create({
             data: {
-                name,
-                email,
-                password: hashedPassword,
+                name: req.body.name,
+                email: req.body.email,
+                // @ts-ignore
+                password: hash,
             },
         });
         console.log("User created successfully:", user);
@@ -50,137 +46,119 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createUser = createUser;
-// User login
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password } = req.body;
         const user = yield prisma.user.findUnique({
-            where: { email },
+            where: { email: req.body.email },
         });
         if (!user) {
-            return res.status(404).send("User not found");
+            return res.status(404).send('User not found');
         }
-        const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
+        const isPasswordValid = yield bcrypt.compare(req.body.password, user.password);
         if (isPasswordValid) {
-            // @ts-ignore
-            const accessToken = jsonwebtoken_1.default.sign({ email }, process.env.SECRET, {
-                expiresIn: "3 days",
-            });
-            res.status(200).json({ accessToken });
+            res.status(200).send('Login successful');
         }
         else {
-            res.status(401).send("Invalid password");
+            res.status(401).send('Invalid password');
         }
     }
     catch (error) {
         console.error(error);
-        res.status(500).send("Internal server error");
+        res.status(500).send('Internal server error');
     }
+    const email = req.body.email;
+    const user = { email: email };
+    const accessToken = jwt.sign(user, process.env.SECRET);
+    res.json({ accessToken: accessToken });
 });
 exports.login = login;
-// Middleware to check and decode JWT token
 const authToken = (req, res, next) => {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
     if (!token)
-        return res.status(403).send("Access denied");
+        return res.status(403).send("Acces denied");
     // @ts-ignore
-    jsonwebtoken_1.default.verify(token, process.env.SECRET, (err, user) => {
+    jwt.verify(token, process.env.SECRET, (err, user) => {
         if (err)
-            return res.status(401).send("Unauthorized");
+            return res.send("null");
         // @ts-ignore
         req.user = user;
         next();
     });
 };
 exports.authToken = authToken;
-// Create a new note
 const createNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, content } = req.body;
-    const note = yield prisma.note.create({
+    const user = yield prisma.note.create({
         data: {
-            title,
-            content,
+            title: title,
+            content: content,
         },
     });
-    console.log("Note created successfully:", note);
-    res.json(note);
+    console.log(user);
+    res.json(user);
 });
 exports.createNote = createNote;
-// Get all notes for the authenticated user
 const getNotes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const notes = yield prisma.note.findMany({
-        // @ts-ignore
-        where: { authorId: req.user.id },
-    });
+    const notes = yield prisma.note.findMany();
     res.json(notes);
 });
 exports.getNotes = getNotes;
-// Get a specific note for the authenticated user
 const getNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const noteId = parseInt(req.params.id);
-    if (isNaN(noteId)) {
-        return res.status(400).send("Note not found");
-    }
-    const note = yield prisma.note.findUnique({
+    const user_id = parseInt(req.params.id);
+    const notes = yield prisma.note.findUnique({
         where: {
-            id: noteId,
+            id: user_id,
         },
     });
-    if (!note) {
-        return res.status(404).send("Note not found");
-    }
-    res.json(note);
+    if (isNaN(user_id))
+        return res.status(400).send("user not found");
+    res.json(notes);
 });
 exports.getNote = getNote;
-// Delete a note
+// delete a note
 const deleteNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const noteId = parseInt(req.params.id);
-    if (isNaN(noteId)) {
-        return res.status(400).send("Note not found");
-    }
-    const note = yield prisma.note.delete({
+    const user_id = parseInt(req.params.id);
+    const notes = yield prisma.note.delete({
         where: {
-            id: noteId,
+            id: user_id,
         },
     });
-    res.json(note);
+    if (isNaN(user_id))
+        return res.status(400).send("user not found");
+    res.json(notes);
 });
 exports.deleteNote = deleteNote;
-// Update a note
+// update note
 const updateNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const noteId = parseInt(req.params.id);
-    if (isNaN(noteId)) {
-        return res.status(400).send("Note not found");
-    }
-    const updatedNote = yield prisma.note.update({
+    const user_id = parseInt(req.params.id);
+    const notes = yield prisma.note.update({
         where: {
-            id: noteId,
+            id: user_id,
         },
         data: {
             content: req.body.content,
-        },
+        }
     });
-    res.json(updatedNote);
+    if (isNaN(user_id))
+        return res.status(400).send("user not found");
+    res.json(notes);
 });
 exports.updateNote = updateNote;
-// Get all users
+// get all users
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield prisma.user.findMany();
+    const users = yield prisma.user.findMany({});
     res.json(users);
 });
 exports.getUsers = getUsers;
-// Delete a user
+// delete a user
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = parseInt(req.params.id);
-    if (isNaN(userId)) {
-        return res.status(400).send("User not found");
-    }
-    const deletedUser = yield prisma.user.delete({
+    const user_id = parseInt(req.params.id);
+    const users = yield prisma.user.delete({
         where: {
-            id: userId,
-        },
+            id: user_id,
+        }
     });
-    res.json(deletedUser);
+    res.json(users);
 });
 exports.deleteUser = deleteUser;

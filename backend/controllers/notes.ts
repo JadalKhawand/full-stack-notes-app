@@ -1,43 +1,35 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
+require('dotenv').config()
+const bcrypt = require('bcryptjs')
 const prisma = new PrismaClient();
+const jwt = require("jsonwebtoken")
 
-interface User {
-  email: string;
-  password: string;
-}
-
-// Test endpoint
 export const test = (req: Request, res: Response) => {
   res.status(200).send("OK");
 };
 
-// Create a new user
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { email, password, name } = req.body;
-
     const exists = await prisma.user.findUnique({
-      where: { email },
+      where: { email: req.body.email },
     });
-
     if (exists) {
-      throw new Error("Email already in use");
+      throw Error("Email already in use");
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hash = await bcrypt.hash(req.body.password, salt);
 
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
-        password: hashedPassword,
+        name: req.body.name,
+        email: req.body.email,
+        // @ts-ignore
+        password: hash,
       },
     });
+    
 
     console.log("User created successfully:", user);
 
@@ -46,157 +38,126 @@ export const createUser = async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
 
-// User login
+
+
+
+}
+
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: req.body.email },
     });
 
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).send('User not found');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
 
     if (isPasswordValid) {
-          // @ts-ignore
-
-      const accessToken = jwt.sign({ email }, process.env.SECRET, {
-        expiresIn: "3 days",
-      });
-      res.status(200).json({ accessToken });
+      res.status(200).send('Login successful');
     } else {
-      res.status(401).send("Invalid password");
+      res.status(401).send('Invalid password');
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal server error");
+    res.status(500).send('Internal server error');
   }
+  const email = req.body.email
+const user = {email: email}
+const accessToken = jwt.sign(user, process.env.SECRET)
+res.json({accessToken: accessToken})
 };
-
-// Middleware to check and decode JWT token
-export const authToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(403).send("Access denied");
-  // @ts-ignore
-
-  jwt.verify(token, process.env.SECRET, (err, user) => {
-    if (err) return res.status(401).send("Unauthorized");
+export const authToken = (req: Request, res: Response, next:Function)=>{
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  if(!token) return res.status(403).send("Acces denied")
+// @ts-ignore
+  jwt.verify(token, process.env.SECRET, (err, user) =>{
+    if(err) return res.send("null")
     // @ts-ignore
-    req.user = user as User;
-    next();
-  });
-};
+    req.user = user
+  next()
+  })
+}
 
-// Create a new note
 export const createNote = async (req: Request, res: Response) => {
   const { title, content } = req.body;
 
-  const note = await prisma.note.create({
+  const user = await prisma.note.create({
     data: {
-      title,
-      content,
+      title: title,
+      content: content,
     },
   });
-
-  console.log("Note created successfully:", note);
-  res.json(note);
+  console.log(user);
+  res.json(user);
 };
 
-// Get all notes for the authenticated user
 export const getNotes = async (req: Request, res: Response) => {
-  const notes = await prisma.note.findMany({
-    // @ts-ignore
-    where: { authorId: req.user.id },
-  });
-
+  const notes = await prisma.note.findMany();
   res.json(notes);
 };
 
-// Get a specific note for the authenticated user
 export const getNote = async (req: Request, res: Response) => {
-  const noteId = parseInt(req.params.id);
-
-  if (isNaN(noteId)) {
-    return res.status(400).send("Note not found");
-  }
-
-  const note = await prisma.note.findUnique({
+  const user_id = parseInt(req.params.id);
+  const notes = await prisma.note.findUnique({
     where: {
-      id: noteId,
+      id: user_id,
     },
   });
-
-  if (!note) {
-    return res.status(404).send("Note not found");
-  }
-
-  res.json(note);
+  if (isNaN(user_id)) return res.status(400).send("user not found");
+  res.json(notes);
 };
 
-// Delete a note
+// delete a note
 export const deleteNote = async (req: Request, res: Response) => {
-  const noteId = parseInt(req.params.id);
-
-  if (isNaN(noteId)) {
-    return res.status(400).send("Note not found");
-  }
-
-  const note = await prisma.note.delete({
+  const user_id = parseInt(req.params.id);
+  const notes = await prisma.note.delete({
     where: {
-      id: noteId,
+      id: user_id,
     },
   });
-
-  res.json(note);
+  if (isNaN(user_id)) return res.status(400).send("user not found");
+  
+  res.json(notes);
 };
 
-// Update a note
+// update note
 export const updateNote = async (req: Request, res: Response) => {
-  const noteId = parseInt(req.params.id);
-
-  if (isNaN(noteId)) {
-    return res.status(400).send("Note not found");
-  }
-
-  const updatedNote = await prisma.note.update({
+  const user_id = parseInt(req.params.id);
+  const notes = await prisma.note.update({
     where: {
-      id: noteId,
+      id: user_id,
     },
-    data: {
+    data:{
       content: req.body.content,
-    },
+    }
   });
+  if (isNaN(user_id)) return res.status(400).send("user not found");
+  res.json(notes);
+}
 
-  res.json(updatedNote);
-};
-
-// Get all users
+// get all users
 export const getUsers = async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-};
+  const users = await prisma.user.findMany({
+    
+  })
+  res.json(users)
+}
 
-// Delete a user
+// delete a user
 export const deleteUser = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.id);
-
-  if (isNaN(userId)) {
-    return res.status(400).send("User not found");
-  }
-
-  const deletedUser = await prisma.user.delete({
+  const user_id = parseInt(req.params.id);
+  const users = await prisma.user.delete({
     where: {
-      id: userId,
-    },
-  });
-
-  res.json(deletedUser);
-};
+      id: user_id,
+    }
+  })
+  res.json(users)
+}
