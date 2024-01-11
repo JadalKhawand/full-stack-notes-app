@@ -29,15 +29,15 @@ function Add() {
   return (
     <div className="form">
       <h3>Add a New Workout</h3>
-      <div>
+      <div className="updated-note">
         <label>Note Title:</label> <br />
         <input type="text" onChange={handleChange} name="title" />
       </div>
-      <div>
+      <div className="updated-note">
         <label>Note Content:</label> <br />
         <textarea onChange={handleChange} name="content" />
       </div>
-      <button onClick={handleSubmit}>Add Note</button>
+      <button className="submit-button" onClick={handleSubmit}>Add Note</button>
     </div>
   );
 }

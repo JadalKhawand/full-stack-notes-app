@@ -31,7 +31,8 @@ function Home() {
   async function handleDelete(id: number) {
     try {
       await axios.delete("http://localhost:5000/notes/delete/" + id);
-      window.location.reload();
+      setNotes(notes.filter((n) => n.id !== id));
+      
     } catch (error) {
       console.log(error);
     }
