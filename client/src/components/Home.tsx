@@ -32,19 +32,29 @@ function Home() {
 
 
   return (
-    <div>
+    <div className='container'>
+      <div className='header'>
       <h1>Notes App</h1>
       <h2>Your Thoughts, Anytime, Anywhere.</h2>
+      </div>
+      <div className='notes'>
+
       {loading? 
       <p>Loading...</p>:
       notes.map((note)=>(
-       
+        
         <div className="note" key={note.id}>
           <h3>{note.title}</h3>
           <p>{note.content}</p>
           <h5>{note.createdAt}</h5>
+          <div className='buttons'>
+          <button className="update">Update</button>
+          <button className="delete">Delete</button>
+          </div>
         </div>
       ))}
+      
+      </div>
       <button>
         <Link to='/add'>Add new Note</Link>
       </button>

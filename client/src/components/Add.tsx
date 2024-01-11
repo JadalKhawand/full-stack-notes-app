@@ -1,13 +1,13 @@
 import React from "react";
 import { useState } from "react";
-import axios from 'axios'
-import {useNavigate} from "react-router-dom"
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 function Add() {
   const [note, setNote] = useState({
     title: "",
     content: "",
   });
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   function handleChange(e: any) {
     setNote((prevNotes) => ({
@@ -15,30 +15,31 @@ function Add() {
       [e.target.name]: e.target.value,
     }));
   }
-  async function handleSubmit(e:any){
-    e.preventDefault()
+  async function handleSubmit(e: any) {
+    e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/notes/create", note)
-      navigate("/")
+      await axios.post("http://localhost:5000/notes/create", note);
+      navigate("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
     console.log("Submitted");
   }
 
   return (
-    <div>
+    <div className="form">
       <h3>Add a New Workout</h3>
-
-      <label>Note Title:</label>
-      <input type="text" onChange={handleChange} name="title" />
-
-      <label>Note Content:</label>
-      <textarea  onChange={handleChange} name="content" />
+      <div>
+        <label>Note Title:</label> <br />
+        <input type="text" onChange={handleChange} name="title" />
+      </div>
+      <div>
+        <label>Note Content:</label> <br />
+        <textarea onChange={handleChange} name="content" />
+      </div>
       <button onClick={handleSubmit}>Add Note</button>
     </div>
   );
-
 }
 
 export default Add;
