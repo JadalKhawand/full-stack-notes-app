@@ -61,3 +61,21 @@ export const updateNote = async (req: Request, res: Response) => {
   res.json(notes);
 }
 
+// get all users
+export const getUsers = async (req: Request, res: Response) => {
+  const users = await prisma.user.findMany({
+    
+  })
+  res.json(users)
+}
+
+// delete a user
+export const deleteUser = async (req: Request, res: Response) => {
+  const user_id = parseInt(req.params.id);
+  const users = await prisma.user.delete({
+    where: {
+      id: user_id,
+    }
+  })
+  res.json(users)
+}

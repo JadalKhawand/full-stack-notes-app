@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateNote = exports.deleteNote = exports.getNote = exports.getNotes = exports.createNote = exports.test = void 0;
+exports.deleteUser = exports.getUsers = exports.updateNote = exports.deleteNote = exports.getNote = exports.getNotes = exports.createNote = exports.test = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const test = (req, res) => {
@@ -74,3 +74,20 @@ const updateNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     res.json(notes);
 });
 exports.updateNote = updateNote;
+// get all users
+const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const users = yield prisma.user.findMany({});
+    res.json(users);
+});
+exports.getUsers = getUsers;
+// delete a user
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user_id = parseInt(req.params.id);
+    const users = yield prisma.user.delete({
+        where: {
+            id: user_id,
+        }
+    });
+    res.json(users);
+});
+exports.deleteUser = deleteUser;

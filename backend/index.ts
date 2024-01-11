@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from 'cors'
 import dotenv from 'dotenv'
-import {test, createNote, getNotes, getNote, deleteNote, updateNote} from './controllers/notes'
+import {test, createNote, getNotes, getNote, deleteNote, updateNote, getUsers, deleteUser} from './controllers/notes'
 dotenv.config()
 const app: Express = express()
 const prisma = new PrismaClient()
@@ -32,9 +32,13 @@ app.delete('/notes/delete/:id',deleteNote)
 
 app.put('/notes/update/:id', updateNote)
 
+// get all users
 
+app.get('/users', getUsers)
 
+// delete a user
 
+app.delete('/users/:id', deleteUser)
 
 app.listen(process.env.PORT, () => {
   console.log(`🚀🚀🚀 Server is running at https://localhost:${process.env.PORT}`);

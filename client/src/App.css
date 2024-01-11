@@ -6,7 +6,7 @@
   text-align: center;
   flex-direction: column;
   gap: 10px;
-  
+  background-color: rgb(95, 198, 95);
 }
 .notes{
   display: flex;
@@ -36,6 +36,7 @@
 }
 .update{
   background-color: whitesmoke;
+  text-decoration: none;
 }
 .update:hover{
   background-color: antiquewhite;

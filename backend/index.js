@@ -25,6 +25,10 @@ app.get('/notes/:id', notes_1.getNote);
 app.delete('/notes/delete/:id', notes_1.deleteNote);
 // update a note
 app.put('/notes/update/:id', notes_1.updateNote);
+// get all users
+app.get('/users', notes_1.getUsers);
+// delete a user
+app.delete('/users/:id', notes_1.deleteUser);
 app.listen(process.env.PORT, () => {
     console.log(`🚀🚀🚀 Server is running at https://localhost:${process.env.PORT}`);
 });
