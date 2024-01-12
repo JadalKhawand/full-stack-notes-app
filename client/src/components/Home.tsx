@@ -41,6 +41,14 @@ function Home() {
   return (
     <div className="container">
       <div className="header">
+        <div className="auth">
+        <h3><Link to="/users/create">
+            <button>Login</button>
+            </Link></h3>
+          <h3><Link to="/users/create">
+            <button>Signup</button>
+            </Link></h3>
+        </div>
         <div>
           <h1>Notes App</h1>
           <h2>Your Thoughts, Anytime, Anywhere.</h2>

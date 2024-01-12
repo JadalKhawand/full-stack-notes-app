@@ -1,35 +1,43 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
-require('dotenv').config()
-const bcrypt = require('bcryptjs')
-const prisma = new PrismaClient();
-const jwt = require("jsonwebtoken")
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
+const prisma = new PrismaClient();
+
+interface User {
+  email: string;
+  password: string;
+}
+
+// Test endpoint
 export const test = (req: Request, res: Response) => {
   res.status(200).send("OK");
 };
 
+// Create a new user
 export const createUser = async (req: Request, res: Response) => {
   try {
+    const { email, password, name } = req.body;
+
     const exists = await prisma.user.findUnique({
-      where: { email: req.body.email },
+      where: { email },
     });
+
     if (exists) {
-      throw Error("Email already in use");
+      throw new Error("Email already in use");
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(req.body.password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await prisma.user.create({
       data: {
-        name: req.body.name,
-        email: req.body.email,
-        // @ts-ignore
-        password: hash,
+        name,
+        email,
+        password: hashedPassword,
       },
     });
-    
 
     console.log("User created successfully:", user);
 
@@ -38,54 +46,56 @@ export const createUser = async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
+};
 
-
-
-
-}
-
+// User login
 export const login = async (req: Request, res: Response) => {
   try {
+    const { email, password } = req.body;
+
     const user = await prisma.user.findUnique({
-      where: { email: req.body.email },
+      where: { email },
     });
 
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send("User not found");
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
-      res.status(200).send('Login successful');
+          // @ts-ignore
+
+      const accessToken = jwt.sign({ email }, process.env.SECRET, {
+        expiresIn: "3 days",
+      });
+      res.status(200).json({ accessToken });
     } else {
-      res.status(401).send('Invalid password');
+      res.status(401).send("Invalid password");
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal server error');
+    res.status(500).send("Internal server error");
   }
-  const email = req.body.email
-const user = {email: email}
-const accessToken = jwt.sign(user, process.env.SECRET)
-res.json({accessToken: accessToken})
 };
-export const authToken = (req: Request, res: Response, next:Function)=>{
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-  if(!token) return res.status(403).send("Acces denied")
-// @ts-ignore
-  jwt.verify(token, process.env.SECRET, (err, user) =>{
-    if(err) return res.send("null")
-    // @ts-ignore
-    req.user = user
-  next()
-  })
-}
 
+// Middleware to check and decode JWT token
+export const authToken = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(403).send("Access denied");
+  // @ts-ignore
+
+  jwt.verify(token, process.env.SECRET, (err, user) => {
+    if (err) return res.status(401).send("Unauthorized");
+    // @ts-ignore
+    req.user = user as User;
+    next();
+  });
+};
+
+// Create a new note
 export const createNote = async (req: Request, res: Response) => {
   const { title, content } = req.body;
 

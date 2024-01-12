@@ -8,33 +8,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.getUsers = exports.updateNote = exports.deleteNote = exports.getNote = exports.getNotes = exports.createNote = exports.authToken = exports.login = exports.createUser = exports.test = void 0;
 const client_1 = require("@prisma/client");
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prisma = new client_1.PrismaClient();
-const jwt = require("jsonwebtoken");
+// Test endpoint
 const test = (req, res) => {
     res.status(200).send("OK");
 };
 exports.test = test;
+// Create a new user
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const { email, password, name } = req.body;
         const exists = yield prisma.user.findUnique({
-            where: { email: req.body.email },
+            where: { email },
         });
         if (exists) {
-            throw Error("Email already in use");
+            throw new Error("Email already in use");
         }
-        const salt = yield bcrypt.genSalt(10);
-        const hash = yield bcrypt.hash(req.body.password, salt);
+        const salt = yield bcryptjs_1.default.genSalt(10);
+        const hashedPassword = yield bcryptjs_1.default.hash(password, salt);
         const user = yield prisma.user.create({
             data: {
-                name: req.body.name,
-                email: req.body.email,
-                // @ts-ignore
-                password: hash,
+                name,
+                email,
+                password: hashedPassword,
             },
         });
         console.log("User created successfully:", user);
@@ -46,47 +50,51 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createUser = createUser;
+// User login
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const { email, password } = req.body;
         const user = yield prisma.user.findUnique({
-            where: { email: req.body.email },
+            where: { email },
         });
         if (!user) {
-            return res.status(404).send('User not found');
+            return res.status(404).send("User not found");
         }
-        const isPasswordValid = yield bcrypt.compare(req.body.password, user.password);
+        const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
         if (isPasswordValid) {
-            res.status(200).send('Login successful');
+            // @ts-ignore
+            const accessToken = jsonwebtoken_1.default.sign({ email }, process.env.SECRET, {
+                expiresIn: "3 days",
+            });
+            res.status(200).json({ accessToken });
         }
         else {
-            res.status(401).send('Invalid password');
+            res.status(401).send("Invalid password");
         }
     }
     catch (error) {
         console.error(error);
-        res.status(500).send('Internal server error');
+        res.status(500).send("Internal server error");
     }
-    const email = req.body.email;
-    const user = { email: email };
-    const accessToken = jwt.sign(user, process.env.SECRET);
-    res.json({ accessToken: accessToken });
 });
 exports.login = login;
+// Middleware to check and decode JWT token
 const authToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
     if (!token)
-        return res.status(403).send("Acces denied");
+        return res.status(403).send("Access denied");
     // @ts-ignore
-    jwt.verify(token, process.env.SECRET, (err, user) => {
+    jsonwebtoken_1.default.verify(token, process.env.SECRET, (err, user) => {
         if (err)
-            return res.send("null");
+            return res.status(401).send("Unauthorized");
         // @ts-ignore
         req.user = user;
         next();
     });
 };
 exports.authToken = authToken;
+// Create a new note
 const createNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, content } = req.body;
     const user = yield prisma.note.create({

@@ -13,12 +13,13 @@ import {
   getUsers,
   deleteUser,
   createUser,
-  login
+  login,
+  authToken
 } from "./controllers/notes";
 dotenv.config();
 const app: Express = express();
 const prisma = new PrismaClient();
-
+app.use(authToken)
 app.use(cors());
 app.use(express.json());
 
