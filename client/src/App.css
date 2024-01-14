@@ -127,3 +127,9 @@ textarea{
   background-color: white;
   cursor: pointer;
 }
+
+.error-message {
+  color: #ff0000;
+  font-size: 14px;
+  margin-top: 5px;
+}

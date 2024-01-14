@@ -17,6 +17,7 @@ function Home() {
   useEffect(() => {
     async function fetchAllNotes() {
       try {
+
         const token = localStorage.getItem('accessToken');
         if(!token){
           return

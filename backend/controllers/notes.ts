@@ -64,8 +64,7 @@ export const login = async (req: Request, res: Response) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
-          // @ts-ignore
-
+      // @ts-ignore
       const accessToken = jwt.sign({ email }, process.env.SECRET, {
         expiresIn: "3 days",
       });
@@ -103,7 +102,7 @@ export const createNote = async (req: Request, res: Response) => {
     data: {
       title: title,
       content: content,
-      userId:1
+      userId: 1,
     },
   });
   console.log(user);
@@ -135,7 +134,7 @@ export const deleteNote = async (req: Request, res: Response) => {
     },
   });
   if (isNaN(user_id)) return res.status(400).send("user not found");
-  
+
   res.json(notes);
 };
 
@@ -146,29 +145,37 @@ export const updateNote = async (req: Request, res: Response) => {
     where: {
       id: user_id,
     },
-    data:{
+    data: {
       content: req.body.content,
-    }
+    },
   });
   if (isNaN(user_id)) return res.status(400).send("user not found");
   res.json(notes);
-}
+};
 
 // get all users
 export const getUsers = async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany({
-    
-  })
-  res.json(users)
-}
+  const users = await prisma.user.findMany({});
+  res.json(users);
+};
 
 // delete a user
 export const deleteUser = async (req: Request, res: Response) => {
   const user_id = parseInt(req.params.id);
-  const users = await prisma.user.delete({
+
+  // Delete associated notes first
+  await prisma.note.deleteMany({
+    where: {
+      userId: user_id,
+    },
+  });
+
+  // Now delete the user
+  const user = await prisma.user.delete({
     where: {
       id: user_id,
-    }
-  })
-  res.json(users)
-}
+    },
+  });
+
+  res.json(user);
+};

@@ -6,7 +6,7 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-
+  const [error, setError] = useState("")
   const navigate = useNavigate();
   const location = useLocation();
   const handleSubmit = async (e: any) => {
@@ -23,6 +23,7 @@ function Signup() {
       navigate("/");
     } catch (error) {
       console.log(error);
+      setError("Email already in use")
     }
   };
 
@@ -52,6 +53,7 @@ function Signup() {
         <div className="submit">
           <button onClick={handleSubmit}>Sign up</button>
         </div>
+        {error && <p className="error-message">{error}</p>}
       </div>
     </form>
   );

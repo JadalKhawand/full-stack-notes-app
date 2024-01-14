@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("")
   const navigate = useNavigate();
   const location = useLocation();
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,6 +28,7 @@ function Login() {
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
+      setError("Incorrect email or password")
     }
   };
 
@@ -50,6 +52,7 @@ function Login() {
         <div className="submit">
           <button onClick={handleSubmit}>Log in</button>
         </div>
+        {error && <p className="error-message">{error}</p>}
       </div>
     </form>
   );
