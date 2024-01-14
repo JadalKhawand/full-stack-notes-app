@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 app.get("/ready", test);
 app.post("/users/create", createUser);
 app.post('/users/login', login)
-app.use(authToken)
+
 app.post("/notes/create", createNote);
 app.get("/notes", getNotes);
 app.get("/notes/:id", getNote);

@@ -17,7 +17,15 @@ function Home() {
   useEffect(() => {
     async function fetchAllNotes() {
       try {
-        const res = await axios.get("http://localhost:5000/notes");
+        const token = localStorage.getItem('accessToken');
+        if(!token){
+          return
+        }
+        const res = await axios.get("http://localhost:5000/notes", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
         setLoading(false);
         setNotes(res.data);
         console.log(res);
@@ -43,10 +51,10 @@ function Home() {
       <div className="header">
         <div className="auth">
         <h3><Link to="/users/login">
-            <button>Login</button>
+            <button className="home-log">Login</button>
             </Link></h3>
           <h3><Link to="/users/create">
-            <button>Signup</button>
+            <button className="home-log">Signup</button>
             </Link></h3>
         </div>
         <div>

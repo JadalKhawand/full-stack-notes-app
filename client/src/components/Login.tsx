@@ -16,11 +16,15 @@ function Login() {
         password,
       };
 
-      const response = await axios.post("http://localhost:5000/users/login", userData);
+      const response = await axios.post(
+        "http://localhost:5000/users/login",
+        userData
+      );
 
-      
       console.log("Login successful:", response.data);
-      navigate("/"); 
+      const { accessToken } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -28,22 +32,25 @@ function Login() {
 
   return (
     <form className="login">
-      <h3>Log in</h3>
+      <div className="logincontainer">
+        <h1>Log in</h1>
 
-      <label>Email: </label>
-      <input
-        type="email"
-        onChange={(e) => setEmail(e.target.value)}
-        value={email}
-      />
-      <label>Password: </label>
-      <input
-        type="password"
-        onChange={(e) => setPassword(e.target.value)}
-        value={password}
-      />
-
-      <button onClick={handleSubmit}>Log in</button>
+        <label>Email: </label>
+        <input
+          type="email"
+          onChange={(e) => setEmail(e.target.value)}
+          value={email}
+        />
+        <label>Password: </label>
+        <input
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+        />
+        <div className="submit">
+          <button onClick={handleSubmit}>Log in</button>
+        </div>
+      </div>
     </form>
   );
 }

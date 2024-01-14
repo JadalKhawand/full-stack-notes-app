@@ -101,6 +101,7 @@ const createNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         data: {
             title: title,
             content: content,
+            userId: 1
         },
     });
     console.log(user);
@@ -146,7 +147,7 @@ const updateNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         },
         data: {
             content: req.body.content,
-        },
+        }
     });
     if (isNaN(user_id))
         return res.status(400).send("user not found");
@@ -165,7 +166,7 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const users = yield prisma.user.delete({
         where: {
             id: user_id,
-        },
+        }
     });
     res.json(users);
 });
