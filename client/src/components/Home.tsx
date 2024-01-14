@@ -42,7 +42,7 @@ function Home() {
     <div className="container">
       <div className="header">
         <div className="auth">
-        <h3><Link to="/users/create">
+        <h3><Link to="/users/login">
             <button>Login</button>
             </Link></h3>
           <h3><Link to="/users/create">

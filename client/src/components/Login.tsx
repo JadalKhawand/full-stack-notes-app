@@ -7,15 +7,25 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
-      await axios.put(`http://localhost:5000/users/login`);
-      navigate("/");
+      const userData = {
+        email,
+        password,
+      };
+
+      const response = await axios.post("http://localhost:5000/users/login", userData);
+
+      
+      console.log("Login successful:", response.data);
+      navigate("/"); 
     } catch (error) {
-      console.log(error);
+      console.error("Login failed:", error);
     }
   };
+
   return (
     <form className="login">
       <h3>Log in</h3>
