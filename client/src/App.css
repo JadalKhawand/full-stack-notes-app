@@ -1,3 +1,10 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
 .container {
   height: 100vh;
   display: flex;
@@ -102,9 +109,7 @@ textarea{
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(190, 218, 235);
-  
-  
+ margin-left: 100px;  
 }
 
 .logincontainer , .signupcontainer{
@@ -113,8 +118,8 @@ textarea{
   width: 300px;
   display: flex;
   flex-direction: column;
-  border:4px solid rgb(73, 166, 166);
-  gap: 18px;
+  border:4px solid rgb(190, 218, 235);
+  gap: 14px;
   border-radius: 20px;
 }
 .submit{
@@ -123,6 +128,14 @@ textarea{
   align-items: center;
   justify-content: center;
   padding: 3px;
+}
+
+.submit button{
+  height: 35px;
+  width: 240px;
+  margin-top: 5px;
+  background-color: #367aff;
+  margin-right: 50px;
 }
 
 .home-log{
@@ -137,4 +150,24 @@ textarea{
   color: #ff0000;
   font-size: 14px;
   margin-top: 5px;
+}
+
+.login-page, .signup-page{
+  display: flex;
+  justify-content: space-between;
+}
+.image{
+  width: 60%;
+  height: 100vh;
+  background-image: url("../public/1.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.image img{
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+h5{
+  margin-left: 20px;
 }

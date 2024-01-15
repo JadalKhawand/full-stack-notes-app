@@ -44,7 +44,12 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             },
         });
         console.log("User created successfully:", user);
-        res.status(201).json({ user });
+        // Generate JWT token for the newly created user
+        const secret = process.env.SECRET || "defaultSecret";
+        const accessToken = jsonwebtoken_1.default.sign({ email: email.toString() }, secret, {
+            expiresIn: "30 days",
+        });
+        res.status(201).json({ user, accessToken });
     }
     catch (error) {
         console.error(error);

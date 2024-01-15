@@ -46,17 +46,18 @@ function Home() {
       console.log(error);
     }
   }
+  const handleLogout = () =>{
+    localStorage.removeItem('accessToken')
+  }
 
   return (
     <div className="container">
       <div className="header">
         <div className="auth">
         <h3><Link to="/users/login">
-            <button className="home-log">Login</button>
+            <button className="home-log" onClick={handleLogout}>Logout</button>
             </Link></h3>
-          <h3><Link to="/users/create">
-            <button className="home-log">Signup</button>
-            </Link></h3>
+          
         </div>
         <div>
           <h1>Notes App</h1>

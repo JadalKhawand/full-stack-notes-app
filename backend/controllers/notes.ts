@@ -43,7 +43,13 @@ export const createUser = async (req: Request, res: Response) => {
 
     console.log("User created successfully:", user);
 
-    res.status(201).json({ user });
+    // Generate JWT token for the newly created user
+    const secret = process.env.SECRET || "defaultSecret";
+    const accessToken = jwt.sign({ email: email.toString() }, secret, {
+      expiresIn: "30 days",
+    });
+
+    res.status(201).json({ user, accessToken });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
