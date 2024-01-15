@@ -42,7 +42,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             },
         });
         console.log("User created successfully:", user);
-        res.status(201).json({ message: "User created successfully", user });
+        res.status(201).json({ user });
     }
     catch (error) {
         console.error(error);
