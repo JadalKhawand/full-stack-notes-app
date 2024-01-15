@@ -18,7 +18,16 @@ function Add() {
   async function handleSubmit(e: any) {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/notes/create", note);
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        return;
+      }
+      
+      await axios.post("http://localhost:5000/notes/create", note, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       navigate("/");
     } catch (error) {
       console.log(error);

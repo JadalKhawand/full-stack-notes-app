@@ -14,40 +14,39 @@ import {
   deleteUser,
   createUser,
   login,
-  authToken
+  authToken,
 } from "./controllers/notes";
 
 dotenv.config();
 const app: Express = express();
 const prisma = new PrismaClient();
 
-// Enable CORS before defining routes
+// JSON parsing middleware
+app.use(express.json());
+
+// Enable CORS
 app.use(cors());
 
 // Auth middleware
 
-
-// JSON parsing middleware
-app.use(express.json());
-
 // CORS headers
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 
 // Routes
 app.get("/ready", test);
 app.post("/users/create", createUser);
-app.post('/users/login', login)
+app.post("/users/login", login);
 
-app.post("/notes/create", createNote);
-app.get("/notes", getNotes);
+app.post("/notes/create", authToken, createNote);
+app.get("/notes", authToken, getNotes);
 app.get("/notes/:id", getNote);
-app.delete("/notes/delete/:id", deleteNote);
-app.put("/notes/update/:id", updateNote);
+app.delete("/notes/delete/:id",  deleteNote);
+app.put("/notes/update/:id",  updateNote);
 app.get("/users", getUsers);
 app.delete("/users/:id", deleteUser);
 

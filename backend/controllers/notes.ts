@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 const prisma = new PrismaClient();
 
@@ -56,19 +58,24 @@ export const login = async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({
       where: { email },
     });
-
+    const notes = await prisma.user.findMany({
+      where: {
+        id: user?.id,
+      },
+    });
     if (!user) {
       return res.status(404).send("User not found");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
+    user["password"] = "";
+    const secret = process.env.SECRET || "defaultSecret";
     if (isPasswordValid) {
       // @ts-ignore
-      const accessToken = jwt.sign({ email }, process.env.SECRET, {
-        expiresIn: "3 days",
+      const accessToken = jwt.sign({ email: email.toString() }, secret, {
+        expiresIn: "30 days",
       });
-      res.status(200).json({ accessToken });
+      res.status(200).json({ accessToken: accessToken });
     } else {
       res.status(401).send("Invalid password");
     }
@@ -78,41 +85,90 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+
 // Middleware to check and decode JWT token
 export const authToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) return res.status(403).send("Access denied");
-  // @ts-ignore
-
+  if (!token) {
+    console.error("Token missing");
+    return res.status(403).send("Access denied");
+  }
+// @ts-ignore
   jwt.verify(token, process.env.SECRET, (err, user) => {
-    if (err) return res.status(401).send("Unauthorized");
+    if (err) {
+      console.error("Token verification failed:", err);
+      return res.status(401).send("Unauthorized");
+    }
+
     // @ts-ignore
-    req.user = user as User;
+    req.decoded = user;
+
+    console.log("Token decoded:", user);
+
     next();
   });
 };
 
+
 // Create a new note
 export const createNote = async (req: Request, res: Response) => {
   const { title, content } = req.body;
+  // @ts-ignore
+  if (!req.decoded || !req.decoded.email) {
+    return res
+      .status(401)
+      .json({ error: "Unauthorized: Invalid or missing JWT token" });
+  }
+  const user = await prisma.user.findUnique({
+    where: {
+      // @ts-ignore
+      email: req.decoded.email,
+    },
+  });
+  if (!user) return;
+  const id = user?.id;
 
-  const user = await prisma.note.create({
+  const note = await prisma.note.create({
     data: {
       title: title,
       content: content,
-      userId: 1,
+      userId: id,
     },
   });
-  console.log(user);
-  res.json(user);
+  console.log(note);
+  res.json(note);
 };
 
 export const getNotes = async (req: Request, res: Response) => {
-  const notes = await prisma.note.findMany();
-  res.json(notes);
+  try {
+    // @ts-ignore
+    const userEmail = req.decoded?.email;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: userEmail,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const notes = await prisma.note.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    res.json(notes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
 };
+
 
 export const getNote = async (req: Request, res: Response) => {
   const user_id = parseInt(req.params.id);

@@ -16,6 +16,8 @@ exports.deleteUser = exports.getUsers = exports.updateNote = exports.deleteNote 
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const prisma = new client_1.PrismaClient();
 // Test endpoint
 const test = (req, res) => {
@@ -57,16 +59,23 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user = yield prisma.user.findUnique({
             where: { email },
         });
+        const notes = yield prisma.user.findMany({
+            where: {
+                id: user === null || user === void 0 ? void 0 : user.id,
+            },
+        });
         if (!user) {
             return res.status(404).send("User not found");
         }
         const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
+        user["password"] = "";
+        const secret = process.env.SECRET || "defaultSecret";
         if (isPasswordValid) {
             // @ts-ignore
-            const accessToken = jsonwebtoken_1.default.sign({ email }, process.env.SECRET, {
-                expiresIn: "3 days",
+            const accessToken = jsonwebtoken_1.default.sign({ email: email.toString() }, secret, {
+                expiresIn: "30 days",
             });
-            res.status(200).json({ accessToken });
+            res.status(200).json({ accessToken: accessToken });
         }
         else {
             res.status(401).send("Invalid password");
@@ -82,14 +91,19 @@ exports.login = login;
 const authToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
-    if (!token)
+    if (!token) {
+        console.error("Token missing");
         return res.status(403).send("Access denied");
+    }
     // @ts-ignore
     jsonwebtoken_1.default.verify(token, process.env.SECRET, (err, user) => {
-        if (err)
+        if (err) {
+            console.error("Token verification failed:", err);
             return res.status(401).send("Unauthorized");
+        }
         // @ts-ignore
-        req.user = user;
+        req.decoded = user;
+        console.log("Token decoded:", user);
         next();
     });
 };
@@ -97,20 +111,56 @@ exports.authToken = authToken;
 // Create a new note
 const createNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, content } = req.body;
-    const user = yield prisma.note.create({
+    // @ts-ignore
+    if (!req.decoded || !req.decoded.email) {
+        return res
+            .status(401)
+            .json({ error: "Unauthorized: Invalid or missing JWT token" });
+    }
+    const user = yield prisma.user.findUnique({
+        where: {
+            // @ts-ignore
+            email: req.decoded.email,
+        },
+    });
+    if (!user)
+        return;
+    const id = user === null || user === void 0 ? void 0 : user.id;
+    const note = yield prisma.note.create({
         data: {
             title: title,
             content: content,
-            userId: 1,
+            userId: id,
         },
     });
-    console.log(user);
-    res.json(user);
+    console.log(note);
+    res.json(note);
 });
 exports.createNote = createNote;
 const getNotes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const notes = yield prisma.note.findMany();
-    res.json(notes);
+    var _a;
+    try {
+        // @ts-ignore
+        const userEmail = (_a = req.decoded) === null || _a === void 0 ? void 0 : _a.email;
+        const user = yield prisma.user.findUnique({
+            where: {
+                email: userEmail,
+            },
+        });
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+        const notes = yield prisma.note.findMany({
+            where: {
+                userId: user.id,
+            },
+        });
+        res.json(notes);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send("Internal server error");
+    }
 });
 exports.getNotes = getNotes;
 const getNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
