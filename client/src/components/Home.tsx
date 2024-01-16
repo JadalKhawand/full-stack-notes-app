@@ -17,16 +17,15 @@ function Home() {
   useEffect(() => {
     async function fetchAllNotes() {
       try {
-
-        const token = localStorage.getItem('accessToken');
-        if(!token){
-          return
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          return;
         }
         const res = await axios.get("http://localhost:5000/notes", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setLoading(false);
         setNotes(res.data);
         console.log(res);
@@ -41,23 +40,25 @@ function Home() {
     try {
       await axios.delete("http://localhost:5000/notes/delete/" + id);
       setNotes(notes.filter((n) => n.id !== id));
-      
     } catch (error) {
       console.log(error);
     }
   }
-  const handleLogout = () =>{
-    localStorage.removeItem('accessToken')
-  }
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+  };
 
   return (
     <div className="container">
       <div className="header">
         <div className="auth">
-        <h3><Link to="/users/login">
-            <button className="home-log" onClick={handleLogout}>Logout</button>
-            </Link></h3>
-          
+          <h3>
+            <Link to="/users/login">
+              <button className="home-log" onClick={handleLogout}>
+                Logout
+              </button>
+            </Link>
+          </h3>
         </div>
         <div>
           <h1>Notes App</h1>
@@ -78,7 +79,7 @@ function Home() {
               <h3>{note.title}</h3>
               <p>{note.content}</p>
               <h5>
-              {/* @ts-ignore */}
+                {/* @ts-ignore */}
                 {formatDistanceToNow(new Date(note.createdAt), {
                   addSuffix: true,
                 })}

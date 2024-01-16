@@ -23,7 +23,7 @@ export const createUser = async (req: Request, res: Response) => {
     const { email, password, name } = req.body;
 
     const exists = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email },
     });
 
     if (exists) {
@@ -91,7 +91,6 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-
 // Middleware to check and decode JWT token
 export const authToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
@@ -101,7 +100,7 @@ export const authToken = (req: Request, res: Response, next: NextFunction) => {
     console.error("Token missing");
     return res.status(403).send("Access denied");
   }
-// @ts-ignore
+  // @ts-ignore
   jwt.verify(token, process.env.SECRET, (err, user) => {
     if (err) {
       console.error("Token verification failed:", err);
@@ -116,7 +115,6 @@ export const authToken = (req: Request, res: Response, next: NextFunction) => {
     next();
   });
 };
-
 
 // Create a new note
 export const createNote = async (req: Request, res: Response) => {
@@ -174,7 +172,6 @@ export const getNotes = async (req: Request, res: Response) => {
     res.status(500).send("Internal server error");
   }
 };
-
 
 export const getNote = async (req: Request, res: Response) => {
   const user_id = parseInt(req.params.id);
