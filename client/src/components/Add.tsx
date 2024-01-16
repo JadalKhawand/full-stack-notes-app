@@ -18,11 +18,11 @@ function Add() {
   async function handleSubmit(e: any) {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem("accessToken");
       if (!token) {
         return;
       }
-      
+
       await axios.post("http://localhost:5000/notes/create", note, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -46,7 +46,9 @@ function Add() {
         <label>Note Content:</label> <br />
         <textarea onChange={handleChange} name="content" />
       </div>
-      <button className="submit-button" onClick={handleSubmit}>Add Note</button>
+      <button className="submit-button" onClick={handleSubmit}>
+        Add Note
+      </button>
     </div>
   );
 }

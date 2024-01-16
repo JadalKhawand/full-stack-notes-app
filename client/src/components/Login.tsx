@@ -55,13 +55,13 @@ function Login() {
           <div className="submit">
             <button onClick={handleSubmit}>Log in</button>
           </div>
-          <h5>Need an account? <Link to="/users/create">Create one</Link> </h5>
+          <h5>
+            Need an account? <Link to="/users/create">Create one</Link>{" "}
+          </h5>
           {error && <p className="error-message">{error}</p>}
         </div>
       </form>
-      <div className="image">
-        
-      </div>
+      <div className="image"></div>
     </div>
   );
 }
