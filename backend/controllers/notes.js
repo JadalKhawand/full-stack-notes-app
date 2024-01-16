@@ -29,7 +29,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { email, password, name } = req.body;
         const exists = yield prisma.user.findUnique({
-            where: { email },
+            where: { email: email },
         });
         if (exists) {
             throw new Error("Email already in use");

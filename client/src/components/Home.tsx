@@ -60,7 +60,7 @@ function Home() {
             </Link>
           </h3>
         </div>
-        <div>
+        <div className="first-section">
           <h1>Notes App</h1>
           <h2>Your Thoughts, Anytime, Anywhere.</h2>
         </div>

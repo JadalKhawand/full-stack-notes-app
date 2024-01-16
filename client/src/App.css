@@ -13,6 +13,7 @@
   flex-direction: column;
   gap: 10px;
   background-color: #bedaeb;
+  overflow: scroll;
 }
 .notes {
   display: flex;
@@ -168,4 +169,17 @@ textarea {
 }
 h5 {
   margin-left: 20px;
+}
+
+.submit-button{
+  padding: 7px;
+  background-color: #57FF48;
+  cursor: pointer;
+}
+.buttons button{
+  padding: 4px;
+  border-radius: 5px;
+}
+.first-section{
+  margin-bottom: 40px;
 }
