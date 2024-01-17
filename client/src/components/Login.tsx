@@ -36,6 +36,8 @@ function Login() {
 
   return (
     <div className="login-page">
+      <img src="/2.png" alt="icon" />
+
       <form className="login">
         <div className="logincontainer">
           <h1>Log in</h1>

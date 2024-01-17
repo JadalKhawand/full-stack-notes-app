@@ -33,6 +33,8 @@ function Signup() {
 
   return (
     <div className="signup-page">
+            <img src="/2.png" alt="icon" />
+
       <form className="signup">
         <div className="signupcontainer">
           <h1>Sign up</h1>

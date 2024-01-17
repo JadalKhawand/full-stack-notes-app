@@ -36,7 +36,10 @@ function Add() {
   }
 
   return (
+    <>
+    <img src="/2.png" alt="icon"/>
     <div className="form">
+      
       <h3>Add a New Workout</h3>
       <div className="updated-note">
         <label>Note Title:</label> <br />
@@ -50,6 +53,7 @@ function Add() {
         Add Note
       </button>
     </div>
+    </>
   );
 }
 
